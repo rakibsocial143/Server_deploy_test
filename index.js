@@ -1,26 +1,17 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 7001;
 require('dotenv').config();
 
 const app = express();
 
-// firebase service accout old virtion
-// const admin = require("firebase-admin");
-
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
-
-// jwt verify 
 const jwt = require('jsonwebtoken');
 
 
+const decoded = Buffer.from(process.env.FIREBASE_SERVICE_KEY, "base64").toString("utf8");
+const serviceAccount = JSON.parse(decoded);
 
-
-// firebase admin new virtion
-const serviceAccount = require("./smart-deals-more-KEY.json");
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 initializeApp({ 
@@ -48,65 +39,6 @@ const verifyFireBaseToken = async ( req, res, next ) => {
   }
 
 }
-
-// const logger = (req, res, next) => {
-//   console.log("logging info");
-//   next();
-// };
-// firebase token verify
-// const verifyFirebaseToken = async (req, res, next) => {
-//   console.log("headers", req.headers.authorization);
-
-//   if (!req.headers.authorization) {
-//     return res.status(401).send({ message: "unauthorization access" });
-//   }
-
-//   const token = req.headers.authorization.split(" ")[1];
-//   if (!token) {
-//     return res.status(401).send({ massge: "unauthorization access" });
-//   }
-
-//   try {
-//     const userInfo = await getAuth().verifyIdToken(token);
-//     console.log("after token validation", userInfo);
-//     req.token_email = userInfo.email;
-//     next();
-//   } 
-//   catch {
-//     return res.status(401).send({ massge: "unauthorization access" });
-//   }
-
-//   // verify id token
-// };
-
-// JWT Verify Token 
-// const verifyJWTToken = (req, res, next) => {
-//   // console.log('in middleware',req.headers);
-//   const authorization = req.headers.authorization;
-//   if(!authorization){
-//     return res.status(401).send({message: 'unauthorizaton access'})
-//   }
-//   const token = authorization.split(" ")[1];
-//   if(!token){
-//     return res.status(401).send({message: 'unauthorizaton access'})
-//   }
-
-//   jwt.verify(token,process.env.JWT_SECRET, (err , decoded) => {
-//     if(err){
-//       console.log(err)
-//     }
-//     // put it in the right place
-//     console.log('after decoded', decoded)
-//     req.token_email = decoded.email;
-//     next()
-//   })
-
-// }
-
-
-
-
-
 
 
 
@@ -227,32 +159,14 @@ async function run() {
       }
 
       // verify user have access to see this data
-      // if(email !== req.token_email){
-      //   return res.status(403).send({message: 'forbidden access'})
-      // }
+      if(email !== req.token_email){
+        return res.status(403).send({message: 'forbidden access'})
+      }
 
       const cursor = await bidsCollection.find(query).toArray();
       res.send(cursor)
 
     })
-
-
-    // bids related apis with firebase token verify 
-    // app.get("/bids", logger, verifyFirebaseToken, async (req, res) => {
-    //   console.log('headers', req)
-
-    //   const email = req.query.email;
-    //   const query = {};
-    //   if (email) {
-    //     if(email !== req.token_email ){
-    //         return res.status(403).send({message: 'forbidden access'})
-    //     }
-    //     query.buyer_email = email;
-    //   }
-
-    //   const cursor = await bidsCollection.find(query).toArray();
-    //   res.send(cursor);
-    // });
 
     app.get("/bids/:id", async (req, res) => {
       const id = req.params.id;
@@ -289,7 +203,7 @@ async function run() {
     });
 
     // ________FOR BIDS COLLECTIONS_______________
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
