@@ -216,6 +216,10 @@ app.get("/", (req, res) => {
   res.send("Smart Deals Server More");
 });
 
-app.listen(port, () => {
-  console.log(`Smart Deals Server Running Now on Port : ${port}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`Smart Deals Server Running Now on Port : ${port}`);
+  });
+}
+
+module.exports = app;
