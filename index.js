@@ -14,7 +14,7 @@ const serviceAccount = JSON.parse(decoded);
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 initializeApp({ 
-  credential: cert(serviceAccount) 
+  credential: cert(serviceAccount)
 });
 
 app.use(cors());
@@ -55,13 +55,18 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+let productCollection;
+let bidsCollection;
+
+
 async function run() {
   try {
     await client.connect();
 
     const db = client.db("Smart_M_DB");
-    const productCollection = db.collection("products");
-    const bidsCollection = db.collection("bids");
+    productCollection = db.collection("products");
+    bidsCollection = db.collection("bids");
 
     // _________JWT TOKEN GENARATE_____________
 
